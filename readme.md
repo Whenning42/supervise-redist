@@ -1,5 +1,8 @@
-A python wheel for catern's [supervise](https://github.com/catern/supervise/tree/master)
+An unoffical redistribution of catern's [supervise](https://github.com/catern/supervise/tree/master)
 that includes the C binary along with the python API.
+
+See their [repo](https://github.com/catern/supervise/tree/master) and [blog post](https://catern.com/posts/fork.html) on Linux process cleanup for background on
+what the project is and why it's necessary.
 
 ## Build prerequisites
 

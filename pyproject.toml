@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "supervise_redist"
-version = "0.6.1"
+version = "0.6.2"
 description = "An unofficial redistribution of Catern's supervise Python package that includes both the supervise binary and python API."
 readme = "readme.md"
 keywords = ["linux", "subprocess", "processes"]
