@@ -246,6 +246,8 @@ def dfork(args: t.List[t.Union[bytes, str, os.PathLike]], env={}, fds={}, cwd=No
     if not executable:
         raise OSError(errno.ENOENT, "Executable not found in PATH", args[0])
     args[0] = executable
+    original_sigchld = signal.getsignal(signal.SIGCHLD)
+    original_sigmask = signal.pthread_sigmask(signal.SIG_BLOCK, [])
 
     try:
         parent_side, child_side = socket.socketpair(socket.AF_UNIX, socket.SOCK_SEQPACKET|flags, 0)
@@ -256,7 +258,13 @@ def dfork(args: t.List[t.Union[bytes, str, os.PathLike]], env={}, fds={}, cwd=No
             os.close(parent_side.fileno())
             os.setsid()
             prctl.set_child_subreaper(True)
+            # Keep SIGCHLD pending until supervise has installed its signalfd.
+            signal.signal(signal.SIGCHLD, signal.SIG_DFL)
+            signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGCHLD})
             with sfork.subprocess() as child_proc:
+                # Restore the caller's signal state in the managed child.
+                signal.signal(signal.SIGCHLD, original_sigchld)
+                signal.pthread_sigmask(signal.SIG_SETMASK, original_sigmask)
                 os.close(child_side.fileno())
                 if cwd:
                     os.chdir(cwd)
@@ -385,10 +393,10 @@ class Process:
         while True:
             _ = select.select([self], [], [])
             self.flush_events()
-            if self.closed():
-                raise Exception("Process was abruptly closed, no final status available")
-            elif self.final_event is not None:
+            if self.final_event is not None:
                 return self.final_event
+            elif self.closed():
+                raise Exception("Process was abruptly closed, no final status available")
 
     def send_signal(self, signum: signal.Signals):
         """Send this signal to the main child process."""
