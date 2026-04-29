@@ -18,9 +18,13 @@ from dataclasses import dataclass
 import signal
 import prctl
 
-supervise_utility_location = sfork.to_bytes(shutil.which("supervise"))
-if not supervise_utility_location:
-    raise FileNotFoundError(errno.ENOENT, "Executable not found in PATH", "supervise")
+def _locate_supervise() -> bytes:
+    bundled = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_bin", "supervise")
+    if not (os.path.isfile(bundled) and os.access(bundled, os.X_OK)):
+        raise FileNotFoundError(errno.ENOENT, "bundled supervise binary not found", bundled)
+    return sfork.to_bytes(bundled)
+
+supervise_utility_location = _locate_supervise()
 
 class ChildCode(enum.Enum):
     EXITED = lib.CLD_EXITED # child called _exit(2)

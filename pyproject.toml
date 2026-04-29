@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=64", "wheel", "cffi>=1.15", "pkgconfig"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "supervise_redist"
+version = "0.6.0"
+description = "An unofficial redistribution of Catern's supervise Python package that includes both the supervise binary and python API."
+readme = "python/README.rst"
+keywords = ["linux", "subprocess", "processes"]
+license = "MIT"
+authors = [{name = "whenning42", email = "wchenningwchenning@gmail.com"}]
+classifiers = [
+    "Operating System :: POSIX :: Linux",
+]
+dependencies = [
+    "cffi>=1.15",
+    "sfork_redist",
+    "python-prctl",
+]
+
+[project.urls]
+Homepage = "https://github.com/whenning42/supervise_wheel"
+
+[dependency-groups]
+dev = [
+    "build",
+    "auditwheel",
+    "twine",
+]
+
+[tool.setuptools]
+package-dir = {"" = "python"}
+packages = ["supervise_api", "supervise_api.tests"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+supervise_api = ["_bin/supervise"]
